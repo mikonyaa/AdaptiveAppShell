@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Re-recorded the showcase at 20 fps with balanced time for every theme
+- Added a warm-launch capture path that removes launch frames from the GIF
+- Made the loop return to the same Classic overview state for a clean repeat
+
 ## 1.0.0
 
 - Added compact tab and regular sidebar presentations

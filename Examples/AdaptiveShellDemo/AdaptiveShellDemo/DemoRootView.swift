@@ -167,41 +167,51 @@ struct DemoRootView: View {
     private func runShowcaseIfNeeded() async {
         guard showcaseMode else { return }
 
-        await pause(milliseconds: 900)
+        await pause(milliseconds: 2_600)
 
         while !Task.isCancelled {
+            await pause(milliseconds: 1_700)
+
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.projects)
             }
-            await pause(milliseconds: 1_300)
+            await pause(milliseconds: 1_200)
+
+            withAnimation(.easeInOut(duration: 0.28)) {
+                shellState.select(.overview)
+            }
+            await pause(milliseconds: 350)
+
+            changeTheme(to: .graphite)
+            await pause(milliseconds: 1_900)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 selectedProjectID = "website-qa"
                 shellState.select(.search)
             }
-            await pause(milliseconds: 1_350)
+            await pause(milliseconds: 1_200)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.overview)
             }
-            await pause(milliseconds: 320)
-            changeTheme(to: .graphite)
-            await pause(milliseconds: 1_130)
+            await pause(milliseconds: 350)
+
+            changeTheme(to: .stone)
+            await pause(milliseconds: 1_900)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.activity)
             }
-            await pause(milliseconds: 320)
-            changeTheme(to: .stone)
-            await pause(milliseconds: 1_030)
+            await pause(milliseconds: 1_200)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 selectedProjectID = "spring-catalogue"
                 shellState.select(.overview)
             }
-            await pause(milliseconds: 320)
+            await pause(milliseconds: 350)
+
             changeTheme(to: .classic)
-            await pause(milliseconds: 1_130)
+            await pause(milliseconds: 500)
         }
     }
 

@@ -27,18 +27,22 @@ xcrun simctl boot "$DEVICE_ID" >/dev/null 2>&1 || true
 xcrun simctl bootstatus "$DEVICE_ID" -b
 xcrun simctl uninstall "$DEVICE_ID" "$BUNDLE_ID" >/dev/null 2>&1 || true
 xcrun simctl install "$DEVICE_ID" "$APP"
+xcrun simctl terminate "$DEVICE_ID" "$BUNDLE_ID" >/dev/null 2>&1 || true
+xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" >/dev/null
+sleep 2
+xcrun simctl terminate "$DEVICE_ID" "$BUNDLE_ID" >/dev/null 2>&1 || true
 xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" --showcase
 
-sleep 1
+sleep 1.8
 xcrun simctl io "$DEVICE_ID" recordVideo --codec=h264 --force "$RECORDING" &
 RECORDING_PID=$!
 
-sleep 8.5
+sleep 13
 kill -INT "$RECORDING_PID" || true
 wait "$RECORDING_PID" || true
 
-ffmpeg -y -ss 1 -i "$RECORDING" \
-  -filter_complex "fps=12,scale=320:-1:flags=lanczos,split[frames][palette_input];[palette_input]palettegen=max_colors=160:stats_mode=diff[palette];[frames][palette]paletteuse=dither=sierra2_4a:diff_mode=rectangle" \
+ffmpeg -y -i "$RECORDING" \
+  -filter_complex "fps=20,scale=400:-1:flags=lanczos,split[frames][palette_input];[palette_input]palettegen=max_colors=192:stats_mode=diff[palette];[frames][palette]paletteuse=dither=sierra2_4a:diff_mode=rectangle" \
   -loop 0 "$GIF" >/dev/null 2>&1
 
 echo "$GIF"
