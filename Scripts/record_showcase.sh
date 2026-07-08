@@ -42,7 +42,7 @@ kill -INT "$RECORDING_PID" || true
 wait "$RECORDING_PID" || true
 
 ffmpeg -y -i "$RECORDING" \
-  -filter_complex "fps=20,scale=400:-1:flags=lanczos,split[frames][palette_input];[palette_input]palettegen=max_colors=192:stats_mode=diff[palette];[frames][palette]paletteuse=dither=sierra2_4a:diff_mode=rectangle" \
+  -filter_complex "fps=20,scale=400:-1:flags=lanczos,split[frames][palette_input];[palette_input]palettegen=max_colors=128:stats_mode=diff[palette];[frames][palette]paletteuse=dither=none:diff_mode=rectangle" \
   -loop 0 "$GIF" >/dev/null 2>&1
 
 echo "$GIF"
