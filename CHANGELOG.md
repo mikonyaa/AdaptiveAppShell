@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Recompressed the showcase GIF at the same 400×870 size and 20 fps while reducing preview weight
+
 ## 1.0.1
 
 - Re-recorded the showcase at 20 fps with balanced time for every theme
