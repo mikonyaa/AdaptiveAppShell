@@ -1,0 +1,75 @@
+name: AdaptiveShellDemo
+
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+configs:
+  Debug: debug
+  Release: release
+
+packages:
+  AdaptiveAppShell:
+    path: ../..
+
+settings:
+  base:
+    CLANG_ENABLE_MODULES: YES
+    DEVELOPMENT_TEAM: ""
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    SDKROOT: iphoneos
+    SWIFT_VERSION: "6.0"
+
+targets:
+  AdaptiveShellDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: AdaptiveShellDemo
+    dependencies:
+      - package: AdaptiveAppShell
+        product: AdaptiveAppShell
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Adaptive Shell
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: dev.liquidglasstemplates.adaptiveshell
+            CFBundleURLSchemes:
+              - adaptiveshell
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSRequiresIPhoneOS: true
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+          UISceneConfigurations: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info.plist
+        MARKETING_VERSION: "0.1.0"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        SUPPORTS_MACCATALYST: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+    scheme:
+      configVariants: []
+      gatherCoverageData: false

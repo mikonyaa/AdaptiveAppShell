@@ -47,13 +47,23 @@ The source supports iOS 17, but Xcode 26 is required to compile the guarded iOS 
 
 ## Run the demo
 
-Open:
+Open the ready-to-use Xcode project:
 
-```text
-Examples/AdaptiveShellDemo/AdaptiveShellDemo.xcodeproj
+```bash
+open Examples/AdaptiveShellDemo/AdaptiveShellDemo.xcodeproj
 ```
 
 Select the `AdaptiveShellDemo` scheme and run on an iPhone or iPad simulator.
+
+Optional: regenerate the Xcode project with XcodeGen if you prefer project files generated from a spec:
+
+```bash
+cd Examples/AdaptiveShellDemo
+xcodegen generate
+open AdaptiveShellDemo.xcodeproj
+```
+
+XcodeGen is not required to use the template. The checked-in `.xcodeproj` is ready to open.
 
 ## Installation
 
@@ -212,6 +222,11 @@ xcodebuild \
   -destination 'generic/platform=iOS Simulator' \
   CODE_SIGNING_ALLOWED=NO \
   build
+
+(
+  cd Examples/AdaptiveShellDemo
+  xcodegen generate
+)
 ```
 
 ## License
