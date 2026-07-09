@@ -54,7 +54,6 @@ Inspector изначально закрыт, чтобы в portrait-режиме
 - [Настройка](Docs/Customization.md)
 - [Доступность](Docs/Accessibility.md)
 - [Проверка качества](Docs/QualityChecklist.md)
-- [Промпт для подробного обучения](Docs/LearningPrompt.md)
 
 ## Проверка
 

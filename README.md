@@ -209,7 +209,6 @@ AdaptiveAppShell/
 - [Customization](Docs/Customization.md)
 - [Accessibility](Docs/Accessibility.md)
 - [Template quality checklist](Docs/QualityChecklist.md)
-- [Beginner AI learning prompt](Docs/LearningPrompt.md)
 
 ## Verification
 
