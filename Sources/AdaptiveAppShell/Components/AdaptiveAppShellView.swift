@@ -248,10 +248,13 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
     }
 
     private func normalizeSelection() {
-        let candidates = isCompact ? compactItems : allItems
-        guard !candidates.isEmpty else { return }
-        guard !candidates.contains(where: { $0.id == state.selection }) else { return }
-        state.selection = candidates[0].id
+        guard let resolved = AdaptiveShellSelectionResolver.resolve(
+            current: state.selection,
+            items: allItems,
+            isCompact: isCompact
+        ) else { return }
+        guard resolved != state.selection else { return }
+        state.selection = resolved
     }
 }
 

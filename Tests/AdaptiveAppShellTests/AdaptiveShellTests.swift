@@ -65,4 +65,68 @@ final class AdaptiveShellStateTests: XCTestCase {
         XCTAssertEqual(AdaptiveShellTheme.preset(.graphite).id, .graphite)
         XCTAssertEqual(AdaptiveShellTheme.preset(.stone).id, .stone)
     }
+
+    func testDeepLinkCanSelectTabAndReplaceOnlyItsPath() {
+        let state = AdaptiveShellState<Tab, Route>(
+            selection: .overview,
+            paths: [.overview: [.project(1)]]
+        )
+
+        state.replacePath([.project(42)], in: .projects)
+        state.select(.projects)
+
+        XCTAssertEqual(state.selection, .projects)
+        XCTAssertEqual(state.paths[.projects], [.project(42)])
+        XCTAssertEqual(state.paths[.overview], [.project(1)])
+    }
+
+    func testInspectorPresentationSurvivesNavigationChanges() {
+        let state = AdaptiveShellState<Tab, Route>(
+            selection: .projects,
+            isInspectorPresented: true
+        )
+
+        state.push(.project(7))
+        state.select(.overview)
+
+        XCTAssertTrue(state.isInspectorPresented)
+        XCTAssertEqual(state.paths[.projects], [.project(7)])
+    }
+
+    func testSelectionResolverNormalizesCompactAndRegularTransitions() {
+        let items = [
+            AdaptiveShellItem(id: Tab.overview, title: "Overview", systemImage: "house"),
+            AdaptiveShellItem(
+                id: Tab.projects,
+                title: "Projects",
+                systemImage: "folder",
+                compactPlacement: .hidden
+            )
+        ]
+
+        XCTAssertEqual(
+            AdaptiveShellSelectionResolver.resolve(
+                current: .projects,
+                items: items,
+                isCompact: true
+            ),
+            .overview
+        )
+        XCTAssertEqual(
+            AdaptiveShellSelectionResolver.resolve(
+                current: .projects,
+                items: items,
+                isCompact: false
+            ),
+            .projects
+        )
+        XCTAssertEqual(
+            AdaptiveShellSelectionResolver.resolve(
+                current: Tab.overview,
+                items: [AdaptiveShellItem<Tab>](),
+                isCompact: true
+            ),
+            nil
+        )
+    }
 }

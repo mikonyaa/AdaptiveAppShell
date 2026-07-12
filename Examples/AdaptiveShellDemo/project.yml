@@ -64,7 +64,7 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Info.plist
-        MARKETING_VERSION: "0.1.0"
+        MARKETING_VERSION: "1.0.3"
         PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo
         PRODUCT_NAME: "$(TARGET_NAME)"
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"

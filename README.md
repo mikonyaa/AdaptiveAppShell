@@ -28,7 +28,7 @@ Part of the [Apple Design Templates](https://github.com/mikonyaa/Apple-Design-Te
 - Optional contextual inspector without duplicating feature state
 - Independent `NavigationStack` path for every destination
 - Sidebar-only collections that do not overload the iPhone tab bar
-- Enum-based routes that support deep links and state restoration
+- Enum-based routes with deterministic deep-link path replacement
 - Native Liquid Glass system chrome on iOS 26
 - Opaque, readable fallback chrome on iOS 17–25
 - Dynamic Type, VoiceOver, Increase Contrast, and Reduce Transparency support
@@ -72,7 +72,7 @@ Add the package in Xcode using its GitHub URL, or declare it in `Package.swift`:
 ```swift
 .package(
     url: "https://github.com/mikonyaa/AdaptiveAppShell.git",
-    from: "1.0.0"
+    from: "1.0.2"
 )
 ```
 
@@ -187,7 +187,7 @@ Themes expose semantic tokens instead of hard-coded view colors:
 .adaptiveShellTheme(.graphite)
 ```
 
-Create a custom theme by initializing `AdaptiveShellTheme`. No theme uses a gradient. Content surfaces remain opaque; Liquid Glass is reserved for system navigation and interactive controls.
+Create a custom theme by initializing `AdaptiveShellTheme`. In `1.x`, its ID identifies the closest built-in preset family; custom theme identity is reserved for a future major version. No theme uses a gradient. Content surfaces remain opaque; Liquid Glass is reserved for system navigation and interactive controls.
 
 ## Project structure
 
@@ -207,6 +207,7 @@ AdaptiveAppShell/
 - [Getting started](Docs/GettingStarted.md)
 - [Architecture](Docs/Architecture.md)
 - [Customization](Docs/Customization.md)
+- [Demo-level state restoration recipe](Docs/StateRestoration.md)
 - [Accessibility](Docs/Accessibility.md)
 - [Template quality checklist](Docs/QualityChecklist.md)
 

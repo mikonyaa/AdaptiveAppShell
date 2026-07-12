@@ -18,6 +18,8 @@ Built-in presets:
 
 All colors are semantic: canvas, surface, text, separator, accent, sidebar, and statuses. Build a custom theme through the public initializer instead of inserting raw colors throughout feature views.
 
+`AdaptiveShellThemeID` identifies a built-in preset family in `1.x`. A custom theme should choose the closest family ID for now. A separate custom identity model would be a major-version API concern, not an additive `1.x` patch.
+
 ## Content surfaces
 
 `AdaptiveShellCard` provides the package surface style. It is intentionally opaque. Do not turn every card into glass; blur reduces hierarchy and can make text depend on unpredictable background content.

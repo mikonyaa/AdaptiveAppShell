@@ -52,6 +52,7 @@ Inspector изначально закрыт, чтобы в portrait-режиме
 - [Быстрый старт](Docs/GettingStarted.md)
 - [Архитектура](Docs/Architecture.md)
 - [Настройка](Docs/Customization.md)
+- [App-owned state restoration](Docs/StateRestoration.md)
 - [Доступность](Docs/Accessibility.md)
 - [Проверка качества](Docs/QualityChecklist.md)
 

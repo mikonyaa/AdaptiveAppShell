@@ -16,8 +16,8 @@ public struct AdaptiveGlassActionButton<Label: View>: View {
     }
 
     public var body: some View {
-#if os(iOS)
-        if #available(iOS 26, *), !reduceTransparency {
+#if os(iOS) || os(macOS)
+        if #available(iOS 26, macOS 26, *), !reduceTransparency {
             Button(action: action) {
                 label
             }

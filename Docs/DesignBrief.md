@@ -92,6 +92,6 @@ The mockups must demonstrate:
 1. Build the shared tab, route, sheet, and navigation-state models.
 2. Implement compact and regular shell presentations.
 3. Add the studio demo content and preview fixtures.
-4. Add deep links, state restoration, keyboard commands, and accessibility behavior.
+4. Add deep links, an app-owned restoration recipe, keyboard commands, and accessibility behavior.
 5. Validate iPhone, iPad, multitasking, Dynamic Type, reduced effects, and earlier-system fallbacks.
 6. Record the final GIF and write integration and learning documentation.

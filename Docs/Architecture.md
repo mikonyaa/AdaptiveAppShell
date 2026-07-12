@@ -13,7 +13,7 @@ The state is `@MainActor` and `@Observable`. A root View owns it with `@State`; 
 
 ## Compact presentation
 
-Compact width renders a system `TabView`. Every compact item wraps its feature root in its own `NavigationStack`. System navigation and tab chrome receive native Liquid Glass automatically on iOS 26. iOS 17–25 receive an opaque semantic toolbar background.
+Compact width renders a system `TabView`. Every compact item wraps its feature root in its own `NavigationStack`. System navigation and tab chrome receive native Liquid Glass automatically on iOS 26. iOS 17–25 receive an opaque semantic toolbar background. `AdaptiveGlassActionButton` also uses the native glass button style on macOS 26 and falls back on macOS 14–15.
 
 ## Regular presentation
 
@@ -30,6 +30,8 @@ An open inspector can force a portrait iPad to hide its sidebar. Defaulting to c
 ## Dependency boundary
 
 The package does not define networking, storage, analytics, or feature models. This keeps it reusable and avoids turning navigation into a global application container.
+
+The package also does not claim automatic state restoration. Apps can encode their own route IDs and restore them through the existing selection and path APIs; see `StateRestoration.md`.
 
 ## Performance
 
