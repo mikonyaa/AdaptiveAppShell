@@ -28,6 +28,7 @@
 		54B11B8D51E0CF628D780800 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6952814A9A10B1D49CD64181 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		69713C6EDA57BD7436AF2051 /* AdaptiveShellDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveShellDemoApp.swift; sourceTree = "<group>"; };
+		6DA6C6FE9A4F275244768F34 /* AdaptiveAppShell */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AdaptiveAppShell; path = ../..; sourceTree = SOURCE_ROOT; };
 		6E8CE16EDFC593876FCCBDE6 /* StudioTabContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioTabContent.swift; sourceTree = "<group>"; };
 		7037CF1691169C6011975F20 /* ProjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectDetailView.swift; sourceTree = "<group>"; };
 		A3217B7F8D4E6C8636271B71 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
@@ -36,7 +37,6 @@
 		BD8868C17FDD84A72E4E6193 /* StudioComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioComponents.swift; sourceTree = "<group>"; };
 		C9C6F1240B3BCE6A1BF52A81 /* StudioSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioSearchView.swift; sourceTree = "<group>"; };
 		DFAD52F96F3DA3E7970A3FAE /* StudioModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioModels.swift; sourceTree = "<group>"; };
-		F22B71130D3021982434FEAF /* adaptive-shell-hardening */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "adaptive-shell-hardening"; path = ../..; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +54,7 @@
 		8D811EA671669D7BBEBEB700 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				F22B71130D3021982434FEAF /* adaptive-shell-hardening */,
+				6DA6C6FE9A4F275244768F34 /* AdaptiveAppShell */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
