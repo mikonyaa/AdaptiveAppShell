@@ -65,7 +65,7 @@ final class StudioDataUITests: XCTestCase {
         XCTAssertTrue(progress.isHittable)
         let frame = app.windows.firstMatch.frame
         XCTAssertGreaterThan(frame.width, frame.height)
-        let screenshot = XCTAttachment(screenshot: XCUIDevice.shared.screenshot())
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.lifetime = .keepAlways
         add(screenshot)
         app.buttons["task-spring-catalogue-images"].tap()
