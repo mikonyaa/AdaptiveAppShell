@@ -39,6 +39,9 @@ extension XCTestCase {
             let frame = app.windows.firstMatch.frame
             XCTAssertGreaterThan(frame.width, frame.height)
         }
+        if !arguments.contains("--inspector") && app.buttons["inspector-close"].isHittable {
+            closeStudioInspector(in: app)
+        }
         return app
     }
 
