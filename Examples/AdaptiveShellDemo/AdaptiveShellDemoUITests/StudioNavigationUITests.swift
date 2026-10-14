@@ -78,9 +78,13 @@ final class StudioNavigationUITests: XCTestCase {
         let app = openStudioURL(known)
         XCTAssertTrue(app.navigationBars["Website QA"].waitForExistence(timeout: 15))
         if app.buttons["inspector-close"].isHittable { closeStudioInspector(in: app) }
-        let back = app.navigationBars["Website QA"].buttons["BackButton"]
+        let back = app.navigationBars["Website QA"].buttons.matching(
+            NSPredicate(format: "identifier == %@ OR label == %@", "BackButton", "Projects")
+        ).firstMatch
         XCTAssertTrue(back.waitForExistence(timeout: 5))
+        XCTAssertTrue(back.isHittable)
         back.tap()
+        XCTAssertTrue(app.navigationBars["Projects"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["project-website-qa"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.navigationBars["Website QA"].exists)
     }
