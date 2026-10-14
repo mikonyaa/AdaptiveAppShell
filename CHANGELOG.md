@@ -6,6 +6,7 @@
 - Give each regular detail stack its tab identity to preserve the correct visible destination when switching tabs.
 - Open Studio projects consistently from Overview, Projects, Search, creation and validated links, regardless of inspector visibility.
 - Add session-only creation, shared task/progress data, effective settings and scoped search with retained query/scope.
+- Provide an accessible close action inside Studio's inspector for narrow native modal presentations.
 - Reject unknown and malformed links explicitly, without fixture fallback or navigation mutations.
 - Capture theme transitions from their hosting window and cancel pending transition work on disappearance.
 - Add hosted demo tests and a separate public consumer; align version-tag triggers, pinned tools and owned-simulator capture.

@@ -82,7 +82,9 @@ struct DemoRootView: View {
             },
             inspector: { _ in
                 if let project = coordinator.inspectorProject {
-                    ProjectInspectorView(project: project, showProgress: store.showProgress)
+                    ProjectInspectorView(project: project, showProgress: store.showProgress) {
+                        shellState.isInspectorPresented = false
+                    }
                 } else {
                     StudioEmptyState(
                         title: "No project selected",

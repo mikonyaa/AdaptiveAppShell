@@ -21,3 +21,7 @@ The regular stack is keyed by tab ID, so a tab switch presents that tab's actual
 The package cannot decide whether an app-owned route ID still exists. Validate restored or URL-derived routes before applying them, and provide an honest unavailable destination when a record disappears. The Studio example demonstrates this without adding storage or URL semantics to the package.
 
 Theme 1.x IDs continue to identify the documented preset family. Application persistence remains optional and app-owned.
+
+## Inspector presentation
+
+The native inspector can adapt to a modal presentation in a narrow window. Provide a close action inside custom inspector content so it remains reachable when the main toolbar is covered; setting `state.isInspectorPresented = false` dismisses it. The Studio example keeps this action separate from its workspace preference to reopen the inspector for later project navigation.

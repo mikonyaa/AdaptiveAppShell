@@ -125,6 +125,7 @@ struct ProjectInspectorView: View {
 
     let project: StudioProject
     var showProgress = true
+    let onClose: () -> Void
 
     var body: some View {
         ScrollView {
@@ -141,6 +142,17 @@ struct ProjectInspectorView: View {
                             .font(.subheadline)
                             .foregroundStyle(theme.secondaryText)
                     }
+                    Spacer(minLength: 0)
+                    Button(role: .cancel, action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(theme.secondaryText)
+                    .accessibilityLabel("Close inspector")
+                    .accessibilityIdentifier("inspector-close")
                 }
 
                 Divider()

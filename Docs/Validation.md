@@ -68,6 +68,10 @@ The baseline is `ed5cc9573a7258cc2549125d538102c9029e753a` (released 1.0.3). A s
 
 These native runs used Xcode 27.0. Compatibility/current CI results are recorded with the exact candidate commit in the pull request; local execution does not substitute for those toolchains. Physical iOS 17/macOS 14 checks remain pending.
 
+Inspector column interactions explicitly use a wide landscape iPad window and require its content to be hittable. On a narrower window the native inspector may adapt to a modal presentation, which must be dismissed before interacting with the background. Closing assertions check that inspector content is no longer hittable: iOS 18 may retain hidden inspector elements in its accessibility tree after dismissal.
+
+The inspector-enabled navigation test also exercises portrait presentation: use the panel's Close inspector button, require the project row to be hittable, open Website QA, verify that the preference reopens the correct inspector with Sam Campbell, then close it and require the underlying Website QA detail. The close action changes presentation only and preserves the preference to reopen the inspector for another project.
+
 Five portrait screenshots and the actual showcase GIF were refreshed and visually inspected. The local XCTest landscape attachment has a rotated/cropped framebuffer despite the passing wide-window interaction assertions; it is excluded from current screenshot assets. Its image-capture verification remains pending, separately from the hosted interaction results.
 
 ## Physical-device result form

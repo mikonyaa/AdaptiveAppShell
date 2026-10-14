@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 @MainActor
@@ -19,12 +20,25 @@ extension XCTestCase {
         return app
     }
 
-    func launchStudio(_ arguments: [String] = []) -> XCUIApplication {
+    func launchStudio(_ arguments: [String] = [], inspectorColumn: Bool = false) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments = arguments
         app.launch()
         XCTAssertTrue(app.buttons["new-project"].waitForExistence(timeout: 10))
+        if inspectorColumn && UIDevice.current.userInterfaceIdiom == .pad {
+            XCUIDevice.shared.orientation = .landscapeLeft
+            let landscape = XCTNSPredicateExpectation(
+                predicate: NSPredicate { object, _ in
+                    guard let window = object as? XCUIElement else { return false }
+                    return window.frame.width > window.frame.height
+                },
+                object: app.windows.firstMatch
+            )
+            wait(for: [landscape], timeout: 10)
+            let frame = app.windows.firstMatch.frame
+            XCTAssertGreaterThan(frame.width, frame.height)
+        }
         return app
     }
 
@@ -41,6 +55,25 @@ extension XCTestCase {
             XCTAssertTrue(sidebar.waitForExistence(timeout: 5), title)
             sidebar.tap()
         }
+    }
+
+    func closeStudioInspector(in app: XCUIApplication) {
+        let toggle = app.buttons["adaptive-shell-inspector-toggle"]
+        guard toggle.waitForExistence(timeout: 5) else {
+            XCTFail("The regular window must expose its inspector control.")
+            return
+        }
+        let close = app.buttons["inspector-close"]
+        if toggle.label == "Hide inspector" || close.isHittable {
+            XCTAssertTrue(close.waitForExistence(timeout: 5))
+            XCTAssertTrue(close.isHittable)
+            close.tap()
+            let hidden = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "hittable == false"), object: close
+            )
+            wait(for: [hidden], timeout: 5)
+        }
+        XCTAssertEqual(toggle.label, "Show inspector")
     }
 
     func replaceSearchQuery(_ query: String, in app: XCUIApplication) {

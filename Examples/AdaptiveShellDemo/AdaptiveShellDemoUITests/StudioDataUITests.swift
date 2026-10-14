@@ -28,7 +28,8 @@ final class StudioDataUITests: XCTestCase {
     }
 
     func testTaskChangesUpdateProgressAndSettingsHaveVisibleEffects() {
-        let app = launchStudio()
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app = launchStudio(inspectorColumn: true)
         app.buttons["project-spring-catalogue"].tap()
         XCTAssertEqual(app.staticTexts["detail-progress"].label, "40%")
         let task = app.buttons["task-spring-catalogue-images"]
