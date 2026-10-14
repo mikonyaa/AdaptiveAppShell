@@ -136,6 +136,7 @@ struct ProjectRow: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let project: StudioProject
+    var showProgress = true
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
@@ -157,9 +158,11 @@ struct ProjectRow: View {
 
                     Spacer(minLength: 8)
 
-                    Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
-                        .font(.subheadline.monospacedDigit())
-                        .foregroundStyle(theme.secondaryText)
+                    if showProgress {
+                        Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
+                            .font(.subheadline.monospacedDigit())
+                            .foregroundStyle(theme.secondaryText)
+                    }
                 }
 
                 Text("\(project.category) · \(project.dueText)")
@@ -167,8 +170,9 @@ struct ProjectRow: View {
                     .foregroundStyle(theme.secondaryText)
 
                 HStack(spacing: 12) {
-                    ProjectProgressBar(progress: project.progress)
-                        .frame(maxWidth: 170)
+                    if showProgress {
+                        ProjectProgressBar(progress: project.progress).frame(maxWidth: 170)
+                    }
 
                     ProjectStatusBadge(status: project.status)
 
@@ -212,12 +216,14 @@ struct ProjectRow: View {
                 .foregroundStyle(theme.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
 
-            ProjectProgressBar(progress: project.progress)
+            if showProgress { ProjectProgressBar(progress: project.progress) }
 
             HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(theme.secondaryText)
+                if showProgress {
+                    Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundStyle(theme.secondaryText)
+                }
 
                 ProjectStatusBadge(status: project.status)
             }

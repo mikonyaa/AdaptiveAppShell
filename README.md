@@ -19,7 +19,7 @@ Part of the [Apple Design Templates](https://github.com/mikonyaa/Apple-Design-Te
 
 | iPad · Stone | iPad · Classic with Inspector |
 | --- | --- |
-| ![Stone iPad sidebar](Assets/Screenshots/ipad-stone.png) | ![Classic iPad inspector](Assets/Screenshots/ipad-landscape-inspector.png) |
+| ![Stone iPad sidebar](Assets/Screenshots/ipad-stone.png) | ![Classic iPad inspector](Assets/Screenshots/ipad-inspector.png) |
 
 ## What this solves
 
@@ -28,7 +28,8 @@ Part of the [Apple Design Templates](https://github.com/mikonyaa/Apple-Design-Te
 - Optional contextual inspector without duplicating feature state
 - Independent `NavigationStack` path for every destination
 - Sidebar-only collections that do not overload the iPhone tab bar
-- Enum-based routes with deterministic deep-link path replacement
+- App-owned typed routes and deterministic path replacement
+- Reactive section changes with predictable selection reconciliation
 - Native Liquid Glass system chrome on iOS 26
 - Opaque, readable fallback chrome on iOS 17–25
 - Dynamic Type, VoiceOver, Increase Contrast, and Reduce Transparency support
@@ -38,12 +39,12 @@ The package contains the reusable shell only. The studio workspace in `Examples`
 
 ## Requirements
 
-- Xcode 26 or newer
+- Xcode 16.4 or newer
 - Swift 6
 - iOS 17 or newer
 - macOS 14 or newer for package consumers
 
-The source supports iOS 17, but Xcode 26 is required to compile the guarded iOS 26 Liquid Glass APIs.
+Xcode 16.4 builds the compatibility branch. Xcode 26 or newer also compiles the guarded native Liquid Glass APIs. The deployment floors remain iOS 17 and macOS 14.
 
 ## Run the demo
 
@@ -72,7 +73,7 @@ Add the package in Xcode using its GitHub URL, or declare it in `Package.swift`:
 ```swift
 .package(
     url: "https://github.com/mikonyaa/AdaptiveAppShell.git",
-    from: "1.0.2"
+    from: "1.0.3"
 )
 ```
 
@@ -157,6 +158,8 @@ struct RootView: View {
 
 Use two to five items with `.tab` compact placement. Extra regular-width destinations belong in sidebar sections with `.hidden` compact placement.
 
+The shell reconciles additions, removals, reordering and compact placement changes. It keeps a valid selection, otherwise chooses the first visible item in configuration order. Empty configurations show **No destinations**. Paths remain app-owned when an item is hidden or removed, so reinserting the same ID restores its history. For duplicate section or item IDs, the first occurrence wins. See [migration and configuration rules](Docs/Migration-1.0.4.md).
+
 ## Inspector integration
 
 Use the full initializer when selected content benefits from a regular-width inspector:
@@ -177,7 +180,7 @@ AdaptiveAppShell(
 )
 ```
 
-The inspector starts closed so the sidebar remains available in portrait iPad layouts. The user controls it from the system toolbar.
+The inspector is optional and controlled from the system toolbar. The demo's **Keep inspector open** preference opens it when a project is opened; turning the preference off permits manual control.
 
 ## Themes
 
@@ -210,11 +213,17 @@ AdaptiveAppShell/
 - [Demo-level state restoration recipe](Docs/StateRestoration.md)
 - [Accessibility](Docs/Accessibility.md)
 - [Template quality checklist](Docs/QualityChecklist.md)
+- [Interactive Studio walkthrough](Examples/AdaptiveShellDemo/README.md)
+- [Candidate release notes](Docs/ReleaseNotes-1.0.4.md)
+- [Validation matrix and remaining device checks](Docs/Validation.md)
+
+The demo stores projects, task changes, settings and search context in memory for the current window session. **New project** creates and opens a real local record; no account or backend is required. Project actions open a detail stack in both presentations, and the optional inspector reads the same model. Unknown links show an explicit message and preserve the existing navigation.
 
 ## Verification
 
 ```bash
 swift test
+swiftlint lint --strict
 
 xcodebuild \
   -project Examples/AdaptiveShellDemo/AdaptiveShellDemo.xcodeproj \
@@ -227,7 +236,12 @@ xcodebuild \
   cd Examples/AdaptiveShellDemo
   xcodegen generate
 )
+
+Scripts/run_ui_tests.sh iphone
+Scripts/run_ui_tests.sh ipad
 ```
+
+The UI script creates and removes only its own simulator and builds a separate public-API consumer outside the checkout. XcodeGen **2.45.4** and SwiftLint **0.65.0** are pinned in CI; the full workflow keeps Xcode 16.4 and 26.5 gates. Physical VoiceOver, keyboard, Stage Manager and adoption checks are tracked separately in the validation matrix.
 
 ## License
 

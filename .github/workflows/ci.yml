@@ -8,6 +8,7 @@ on:
       - "release/**"
     tags:
       - "v*"
+      - "[0-9]*.[0-9]*.[0-9]*"
   workflow_dispatch:
 
 permissions:
@@ -22,6 +23,7 @@ env:
   DEMO_SCHEME: AdaptiveShellDemo
   DEMO_DESTINATION: "generic/platform=iOS Simulator"
   XCODEGEN_VERSION: "2.45.4"
+  SWIFTLINT_VERSION: "0.65.0"
 
 jobs:
   fast:
@@ -33,8 +35,18 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
-      - name: Ensure SwiftLint
-        run: command -v swiftlint >/dev/null || brew install swiftlint
+      - name: Install pinned tools
+        run: |
+          curl --fail --location --silent --show-error \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip" \
+            --output "$RUNNER_TEMP/swiftlint.zip"
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          echo "$RUNNER_TEMP/swiftlint" >> "$GITHUB_PATH"
+      - name: Tool versions
+        run: |
+          swift --version
+          xcodebuild -version
+          test "$(swiftlint version)" = "$SWIFTLINT_VERSION"
       - name: Test package
         run: swift test
       - name: Lint
@@ -47,6 +59,12 @@ jobs:
             -destination "$DEMO_DESTINATION" \
             CODE_SIGNING_ALLOWED=NO \
             build
+      - name: Build separate public consumer
+        run: |
+          consumer="$RUNNER_TEMP/public-consumer"
+          python3 Scripts/prepare_consumer.py "$consumer"
+          swift package --package-path "$consumer" resolve
+          swift build --package-path "$consumer"
 
   full:
     name: Full · ${{ matrix.name }}
@@ -62,13 +80,29 @@ jobs:
             runner: macos-26
             developer_dir: /Applications/Xcode_26.5.app/Contents/Developer
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       DEVELOPER_DIR: ${{ matrix.developer_dir }}
     steps:
       - uses: actions/checkout@v4
-      - name: Ensure SwiftLint
-        run: command -v swiftlint >/dev/null || brew install swiftlint
+      - name: Install pinned tools
+        run: |
+          curl --fail --location --silent --show-error \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip" \
+            --output "$RUNNER_TEMP/swiftlint.zip"
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          echo "$RUNNER_TEMP/swiftlint" >> "$GITHUB_PATH"
+          curl --fail --location --silent --show-error \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip" \
+            --output "$RUNNER_TEMP/xcodegen.zip"
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP/xcodegen"
+          echo "$RUNNER_TEMP/xcodegen/xcodegen/bin" >> "$GITHUB_PATH"
+      - name: Tool versions
+        run: |
+          swift --version
+          xcodebuild -version
+          test "$(swiftlint version)" = "$SWIFTLINT_VERSION"
+          test "$(xcodegen --version | awk '{print $2}')" = "$XCODEGEN_VERSION"
       - name: Test package
         run: swift test
       - name: Lint
@@ -81,14 +115,23 @@ jobs:
             -destination "$DEMO_DESTINATION" \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Install pinned XcodeGen
-        if: matrix.name == 'current'
+      - name: Hosted demo and public consumer · iPhone
+        run: Scripts/run_ui_tests.sh iphone
+      - name: Hosted demo and public consumer · iPad
+        run: Scripts/run_ui_tests.sh ipad
+      - name: Upload native test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-results-${{ matrix.name }}
+          path: DerivedData-qa-*/**/results/*.xcresult
+          if-no-files-found: warn
+      - name: Build released public consumer
         run: |
-          curl --fail --location --silent --show-error \
-            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip" \
-            --output "$RUNNER_TEMP/xcodegen.zip"
-          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP/xcodegen"
-          echo "$RUNNER_TEMP/xcodegen/xcodegen/bin" >> "$GITHUB_PATH"
+          consumer="$RUNNER_TEMP/released-consumer"
+          python3 Scripts/prepare_consumer.py "$consumer" --version 1.0.3
+          swift package --package-path "$consumer" resolve
+          swift build --package-path "$consumer"
       - name: Reproduce checked-in project
         if: matrix.name == 'current'
         run: |

@@ -21,6 +21,20 @@
                ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FFFD6C1BDF49A63AC66F4023"
+               BuildableName = "StudioAdaptationHost.app"
+               BlueprintName = "StudioAdaptationHost"
+               ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -28,6 +42,7 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
+      codeCoverageEnabled = "YES"
       onlyGenerateCoverageForSpecifiedTargets = "NO">
       <MacroExpansion>
          <BuildableReference
@@ -39,6 +54,39 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "47E517443737D746BF43CAD7"
+               BuildableName = "AdaptiveShellDemoTests.xctest"
+               BlueprintName = "AdaptiveShellDemoTests"
+               ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "253991B511D71377A1FFB076"
+               BuildableName = "AdaptiveShellDemoUITests.xctest"
+               BlueprintName = "AdaptiveShellDemoUITests"
+               ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A7497FC705C1A7C61E3922A0"
+               BuildableName = "StudioAdaptationUITests.xctest"
+               BlueprintName = "StudioAdaptationUITests"
+               ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
@@ -63,8 +111,6 @@
             ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -82,8 +128,6 @@
             ReferencedContainer = "container:AdaptiveShellDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-      </CommandLineArguments>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

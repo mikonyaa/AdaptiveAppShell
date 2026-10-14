@@ -4,12 +4,12 @@ import UIKit
 
 struct DemoRootView: View {
     @State private var shellState: AdaptiveShellState<StudioTab, StudioRoute>
+    @State private var store: StudioStore
+    @State private var coordinator: StudioCoordinator
     @State private var themeID: AdaptiveShellThemeID
-    @State private var selectedProjectID = StudioFixtures.projects[0].id
     @State private var presentedSheet: StudioSheet?
-    @State private var themeSnapshot: UIImage?
-    @State private var themeSnapshotOpacity = 0.0
-    @State private var themeTransitionID = UUID()
+    @State private var windowReference = StudioWindowReference()
+    @State private var themeTransition = StudioThemeTransition()
 
     private let showcaseMode: Bool
     private let profileMode: Bool
@@ -27,13 +27,16 @@ struct DemoRootView: View {
             initialTheme = .classic
         }
 
-        _shellState = State(
-            initialValue: AdaptiveShellState<StudioTab, StudioRoute>(
-                selection: initialTab,
-                columnVisibility: .all,
-                isInspectorPresented: arguments.contains("--inspector")
-            )
+        let state = AdaptiveShellState<StudioTab, StudioRoute>(
+            selection: initialTab,
+            columnVisibility: .all,
+            isInspectorPresented: arguments.contains("--inspector")
         )
+        let store = StudioStore()
+        store.keepInspectorOpen = arguments.contains("--inspector")
+        _shellState = State(initialValue: state)
+        _store = State(initialValue: store)
+        _coordinator = State(initialValue: StudioCoordinator(store: store, state: state))
         _themeID = State(initialValue: initialTheme)
         showcaseMode = arguments.contains("--showcase")
         profileMode = arguments.contains("--profile")
@@ -41,10 +44,6 @@ struct DemoRootView: View {
 
     private var theme: AdaptiveShellTheme {
         AdaptiveShellTheme.preset(themeID)
-    }
-
-    private var selectedProject: StudioProject {
-        StudioFixtures.project(id: selectedProjectID)
     }
 
     private var themeSelection: Binding<AdaptiveShellThemeID> {
@@ -60,35 +59,51 @@ struct DemoRootView: View {
             sections: StudioTab.sections,
             state: shellState,
             showsInspector: { item in
+                if shellState.paths[item.id]?.last != nil { return true }
                 switch item.id {
                 case .overview, .projects, .clientWork, .internalWork, .archive:
-                    true
+                    return true
                 case .activity, .search, .settings:
-                    false
+                    return false
                 }
             },
             content: { item, navigation in
                 StudioTabContent(
                     tab: item.id,
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID,
+                    store: store,
+                    coordinator: coordinator,
                     themeID: themeSelection,
                     presentedSheet: $presentedSheet
                 )
             },
             destination: { route in
-                StudioRouteView(route: route)
+                StudioRouteView(route: route, store: store)
             },
             inspector: { _ in
-                ProjectInspectorView(project: selectedProject)
+                if let project = coordinator.inspectorProject {
+                    ProjectInspectorView(project: project, showProgress: store.showProgress)
+                } else {
+                    StudioEmptyState(
+                        title: "No project selected",
+                        message: "Open a project to see its details.", systemImage: "folder"
+                    )
+                }
             }
         )
         .adaptiveShellTheme(theme)
         .preferredColorScheme(theme.recommendedColorScheme)
+        .background(StudioWindowReader(reference: windowReference))
         .sheet(item: $presentedSheet) { sheet in
             switch sheet {
             case .newProject:
-                NewProjectSheet()
+                NewProjectSheet { name, category, dueDate in
+                    guard let project = store.createProject(name: name, category: category, dueDate: dueDate) else {
+                        return false
+                    }
+                    coordinator.openProject(project.id, from: .projects, replacingPath: true)
+                    return true
+                }
                     .adaptiveShellTheme(theme)
                     .preferredColorScheme(theme.recommendedColorScheme)
             case .profile:
@@ -97,25 +112,43 @@ struct DemoRootView: View {
                     .preferredColorScheme(theme.recommendedColorScheme)
             }
         }
-        .onOpenURL(perform: handleDeepLink)
+        .onOpenURL(perform: coordinator.handleDeepLink)
+        .onChange(of: store.keepInspectorOpen) { _, keepOpen in
+            shellState.isInspectorPresented = keepOpen
+        }
+        .alert(
+            coordinator.navigationMessage?.title ?? "Navigation",
+            isPresented: Binding(
+                get: { coordinator.navigationMessage != nil },
+                set: { if !$0 { coordinator.navigationMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { coordinator.navigationMessage = nil }
+        } message: {
+            Text(coordinator.navigationMessage?.message ?? "")
+        }
         .overlay {
-            if let themeSnapshot {
-                Image(uiImage: themeSnapshot)
+            if let snapshot = themeTransition.snapshot {
+                Image(uiImage: snapshot)
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
-                    .opacity(themeSnapshotOpacity)
+                    .opacity(themeTransition.opacity)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
         }
+        .onDisappear { themeTransition.cancel() }
         .task {
-            if profileMode {
-                await pause(milliseconds: 300)
-                presentedSheet = .profile
+            do {
+                if profileMode {
+                    try await pause(milliseconds: 300)
+                    presentedSheet = .profile
+                }
+                try await runShowcaseIfNeeded()
+            } catch {
+                return
             }
-
-            await runShowcaseIfNeeded()
         }
     }
 
@@ -124,115 +157,67 @@ struct DemoRootView: View {
         guard newThemeID != themeID else { return }
 
         guard !UIAccessibility.isReduceMotionEnabled else {
+            themeTransition.cancel()
             themeID = newThemeID
             return
         }
 
-        let transitionID = UUID()
-        themeTransitionID = transitionID
-        themeSnapshot = WindowSnapshot.capture()
-        themeSnapshotOpacity = 1
+        themeTransition.start(in: windowReference.window)
         themeID = newThemeID
-
-        Task { @MainActor in
-            await pause(milliseconds: 70)
-
-            guard themeTransitionID == transitionID else { return }
-
-            withAnimation(.easeInOut(duration: 0.52)) {
-                themeSnapshotOpacity = 0
-            }
-
-            await pause(milliseconds: 560)
-
-            guard themeTransitionID == transitionID else { return }
-            themeSnapshot = nil
-        }
-    }
-
-    private func handleDeepLink(_ url: URL) {
-        guard url.scheme == "adaptiveshell" else { return }
-        let components = url.pathComponents.filter { $0 != "/" }
-
-        if url.host == "project", let id = components.first {
-            selectedProjectID = id
-            shellState.select(.projects)
-            shellState.replacePath([.project(id)], in: .projects)
-        } else if url.host == "search" {
-            shellState.select(.search)
-        }
     }
 
     @MainActor
-    private func runShowcaseIfNeeded() async {
+    private func runShowcaseIfNeeded() async throws {
         guard showcaseMode else { return }
 
-        await pause(milliseconds: 2_600)
+        try await pause(milliseconds: 2_600)
 
         while !Task.isCancelled {
-            await pause(milliseconds: 1_700)
+            try await pause(milliseconds: 1_700)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.projects)
             }
-            await pause(milliseconds: 1_200)
+            try await pause(milliseconds: 1_200)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.overview)
             }
-            await pause(milliseconds: 350)
+            try await pause(milliseconds: 350)
 
             changeTheme(to: .graphite)
-            await pause(milliseconds: 1_900)
+            try await pause(milliseconds: 1_900)
 
             withAnimation(.easeInOut(duration: 0.28)) {
-                selectedProjectID = "website-qa"
                 shellState.select(.search)
             }
-            await pause(milliseconds: 1_200)
+            try await pause(milliseconds: 1_200)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.overview)
             }
-            await pause(milliseconds: 350)
+            try await pause(milliseconds: 350)
 
             changeTheme(to: .stone)
-            await pause(milliseconds: 1_900)
+            try await pause(milliseconds: 1_900)
 
             withAnimation(.easeInOut(duration: 0.28)) {
                 shellState.select(.activity)
             }
-            await pause(milliseconds: 1_200)
+            try await pause(milliseconds: 1_200)
 
             withAnimation(.easeInOut(duration: 0.28)) {
-                selectedProjectID = "spring-catalogue"
                 shellState.select(.overview)
             }
-            await pause(milliseconds: 350)
+            try await pause(milliseconds: 350)
 
             changeTheme(to: .classic)
-            await pause(milliseconds: 500)
+            try await pause(milliseconds: 500)
         }
     }
 
-    private func pause(milliseconds: UInt64) async {
-        try? await Task.sleep(nanoseconds: milliseconds * 1_000_000)
-    }
-}
-
-@MainActor
-private enum WindowSnapshot {
-    static func capture() -> UIImage? {
-        let window = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first(where: \.isKeyWindow)
-
-        guard let window else { return nil }
-
-        return UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
-            window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
-        }
+    private func pause(milliseconds: UInt64) async throws {
+        try await Task.sleep(nanoseconds: milliseconds * 1_000_000)
     }
 }
 

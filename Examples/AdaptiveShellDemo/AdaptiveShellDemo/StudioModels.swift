@@ -12,6 +12,8 @@ enum StudioTab: String, Hashable, CaseIterable, Sendable {
     case internalWork
     case archive
 
+    var isCollection: Bool { self == .clientWork || self == .internalWork || self == .archive }
+
     static let sections: [AdaptiveShellSection<StudioTab>] = [
         AdaptiveShellSection(
             id: "primary",
@@ -78,7 +80,7 @@ enum StudioTab: String, Hashable, CaseIterable, Sendable {
 
 enum StudioRoute: Hashable, Sendable {
     case project(String)
-    case task(String)
+    case task(projectID: String, taskID: String)
 }
 
 enum StudioSheet: Identifiable {
@@ -112,19 +114,29 @@ struct StudioProject: Identifiable, Hashable, Sendable {
     let name: String
     let category: String
     let dueText: String
-    let progress: Double
-    let status: StudioProjectStatus
+    var status: StudioProjectStatus
     let collection: StudioCollection
     let systemImage: String
     let ownerInitials: [String]
-    let tasks: [StudioTask]
+    var tasks: [StudioTask]
+
+    var progress: Double {
+        guard !tasks.isEmpty else { return status == .complete ? 1 : 0 }
+        return Double(tasks.filter(\.isComplete).count) / Double(tasks.count)
+    }
 }
 
 struct StudioTask: Identifiable, Hashable, Sendable {
     let id: String
     let title: String
     let dueText: String
-    let isComplete: Bool
+    var isComplete: Bool
+}
+
+struct StudioPerson: Identifiable, Hashable, Sendable {
+    let id: String
+    let name: String
+    let role: String
 }
 
 struct StudioActivity: Identifiable, Hashable, Sendable {
@@ -136,13 +148,17 @@ struct StudioActivity: Identifiable, Hashable, Sendable {
 }
 
 enum StudioFixtures {
+    static let people = [
+        StudioPerson(id: "AM", name: "Alex Morgan", role: "Design Director"),
+        StudioPerson(id: "NW", name: "Noah Williams", role: "Art Director"),
+        StudioPerson(id: "SC", name: "Sam Campbell", role: "Designer")
+    ]
     static let projects: [StudioProject] = [
         StudioProject(
             id: "spring-catalogue",
             name: "Spring catalogue",
             category: "Brand + Print",
             dueText: "Due 16 Jul",
-            progress: 0.75,
             status: .onTrack,
             collection: .client,
             systemImage: "book.closed",
@@ -160,7 +176,6 @@ enum StudioFixtures {
             name: "Website QA",
             category: "Web",
             dueText: "Due 22 Jul",
-            progress: 0.40,
             status: .onTrack,
             collection: .client,
             systemImage: "globe",
@@ -176,7 +191,6 @@ enum StudioFixtures {
             name: "Packaging review",
             category: "Packaging",
             dueText: "Due 30 Jul",
-            progress: 0.20,
             status: .atRisk,
             collection: .client,
             systemImage: "shippingbox",
@@ -191,7 +205,6 @@ enum StudioFixtures {
             name: "Studio handbook",
             category: "Operations",
             dueText: "Due 4 Aug",
-            progress: 0.62,
             status: .onTrack,
             collection: .internalWork,
             systemImage: "text.book.closed",
@@ -205,7 +218,6 @@ enum StudioFixtures {
             name: "Winter campaign",
             category: "Campaign",
             dueText: "Completed 2025",
-            progress: 1.0,
             status: .complete,
             collection: .archive,
             systemImage: "checkmark.seal",
@@ -245,7 +257,7 @@ enum StudioFixtures {
         )
     ]
 
-    static func project(id: String) -> StudioProject {
-        projects.first { $0.id == id } ?? projects[0]
+    static func project(id: String) -> StudioProject? {
+        projects.first { $0.id == id }
     }
 }

@@ -5,8 +5,7 @@ struct SettingsView: View {
     @Environment(\.adaptiveShellTheme) private var theme
 
     @Binding var themeID: AdaptiveShellThemeID
-    @State private var showProgress = true
-    @State private var keepInspectorOpen = true
+    @Bindable var store: StudioStore
 
     var body: some View {
         ScrollView {
@@ -23,18 +22,25 @@ struct SettingsView: View {
 
                 AdaptiveShellCard(padding: 0) {
                     VStack(spacing: 0) {
-                        Toggle("Show project progress", isOn: $showProgress)
+                        Toggle("Show project progress", isOn: $store.showProgress)
+                            .accessibilityIdentifier("show-project-progress")
                             .padding(16)
 
                         Divider()
                             .overlay(theme.separator)
                             .padding(.leading, 16)
 
-                        Toggle("Keep inspector open", isOn: $keepInspectorOpen)
+                        Toggle("Keep inspector open", isOn: $store.keepInspectorOpen)
+                            .accessibilityIdentifier("keep-inspector-open")
                             .padding(16)
                     }
                     .foregroundStyle(theme.primaryText)
                 }
+
+                Text("Session-only data and settings. "
+                     + "Inspector preference applies when opening projects in regular width.")
+                    .font(.footnote)
+                    .foregroundStyle(theme.secondaryText)
 
                 StudioSectionHeader(title: "About this template")
 

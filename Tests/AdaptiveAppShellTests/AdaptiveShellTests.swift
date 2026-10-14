@@ -2,6 +2,32 @@ import XCTest
 @testable import AdaptiveAppShell
 
 final class AdaptiveShellItemTests: XCTestCase {
+    func testDuplicateItemIDsUseFirstOccurrenceForCompactPlacement() {
+        let items = [
+            AdaptiveShellItem(id: "alpha", title: "Hidden", systemImage: "a.circle", compactPlacement: .hidden),
+            AdaptiveShellItem(id: "beta", title: "Beta", systemImage: "b.circle"),
+            AdaptiveShellItem(id: "alpha", title: "Duplicate", systemImage: "a.circle")
+        ]
+        XCTAssertEqual(
+            AdaptiveShellSelectionResolver.resolve(current: "alpha", items: items, isCompact: true),
+            "beta"
+        )
+    }
+
+    func testDuplicateSectionAndItemIDsHaveDeterministicFirstOccurrence() {
+        let alpha = AdaptiveShellItem(id: "alpha", title: "Alpha", systemImage: "a.circle")
+        let beta = AdaptiveShellItem(id: "beta", title: "Beta", systemImage: "b.circle")
+        let sections = [
+            AdaptiveShellSection(id: "first", title: "First", items: [alpha]),
+            AdaptiveShellSection(id: "second", items: [alpha, beta]),
+            AdaptiveShellSection(id: "first", items: [beta])
+        ]
+        let result = AdaptiveShellSelectionResolver.uniqueSections(sections)
+        XCTAssertEqual(result.map(\.id), ["first", "second"])
+        XCTAssertEqual(result.flatMap(\.items).map(\.id), ["alpha", "beta"])
+        XCTAssertEqual(result.first?.title, "First")
+    }
+
     func testItemUsesFallbackSelectedSymbol() {
         let item = AdaptiveShellItem(
             id: "overview",

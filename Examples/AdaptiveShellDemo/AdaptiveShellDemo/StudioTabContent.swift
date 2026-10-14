@@ -4,7 +4,8 @@ import SwiftUI
 struct StudioTabContent: View {
     let tab: StudioTab
     let navigation: AdaptiveShellNavigation<StudioTab, StudioRoute>
-    @Binding var selectedProjectID: String
+    let store: StudioStore
+    let coordinator: StudioCoordinator
     @Binding var themeID: AdaptiveShellThemeID
     @Binding var presentedSheet: StudioSheet?
 
@@ -13,45 +14,50 @@ struct StudioTabContent: View {
             switch tab {
             case .overview:
                 OverviewView(
-                    navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             case .projects:
                 ProjectsView(
                     title: "Projects",
-                    projects: StudioFixtures.projects.filter { $0.collection != .archive },
+                    projects: store.projects.filter { $0.collection != .archive },
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             case .activity:
                 ActivityView()
             case .search:
                 StudioSearchView(
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             case .settings:
-                SettingsView(themeID: $themeID)
+                SettingsView(themeID: $themeID, store: store)
             case .clientWork:
                 ProjectsView(
                     title: "Client work",
-                    projects: StudioFixtures.projects.filter { $0.collection == .client },
+                    projects: store.projects.filter { $0.collection == .client },
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             case .internalWork:
                 ProjectsView(
                     title: "Internal",
-                    projects: StudioFixtures.projects.filter { $0.collection == .internalWork },
+                    projects: store.projects.filter { $0.collection == .internalWork },
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             case .archive:
                 ProjectsView(
                     title: "Archive",
-                    projects: StudioFixtures.projects.filter { $0.collection == .archive },
+                    projects: store.projects.filter { $0.collection == .archive },
                     navigation: navigation,
-                    selectedProjectID: $selectedProjectID
+                    store: store,
+                    coordinator: coordinator
                 )
             }
         }
@@ -64,6 +70,7 @@ struct StudioTabContent: View {
                 } label: {
                     Label("New project", systemImage: "plus")
                 }
+                .accessibilityIdentifier("new-project")
 
                 Button {
                     presentedSheet = .profile
@@ -98,13 +105,21 @@ struct StudioTabContent: View {
 
 struct StudioRouteView: View {
     let route: StudioRoute
+    let store: StudioStore
 
     var body: some View {
         switch route {
         case .project(let id):
-            ProjectDetailView(project: StudioFixtures.project(id: id))
-        case .task(let id):
-            TaskDetailView(taskID: id)
+            if let project = store.project(id: id) {
+                ProjectDetailView(project: project, store: store)
+            } else {
+                StudioEmptyState(
+                    title: "Project not found", message: "This project is not available in this session.",
+                    systemImage: "folder.badge.questionmark"
+                )
+            }
+        case .task(let projectID, let taskID):
+            TaskDetailView(projectID: projectID, taskID: taskID, store: store)
         }
     }
 }

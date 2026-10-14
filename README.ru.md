@@ -1,6 +1,6 @@
 # Adaptive App Shell
 
-Готовая SwiftUI-оболочка приложения: на iPhone она использует нижний tab bar, а на iPad — sidebar и опциональный inspector. Навигационное состояние остаётся общим и не теряется при изменении размера окна.
+SwiftUI-оболочка приложения: на iPhone она использует нижний tab bar, а на iPad — sidebar и опциональный inspector. Каждая вкладка хранит свой typed route path в общем app-owned состоянии.
 
 ![Adaptive App Shell](Assets/GIFs/adaptive-app-shell.gif)
 
@@ -9,6 +9,7 @@
 - Системный `TabView` для компактной ширины
 - `NavigationSplitView` для iPad и широких окон
 - Независимая история навигации каждой вкладки
+- Реакция на добавление, удаление, скрытие и перестановку разделов
 - Sidebar-only коллекции без перегруженного tab bar
 - Контекстный inspector
 - Enum-маршруты для deep links
@@ -45,7 +46,15 @@ Shell управляет только presentation и навигацией. Он
 
 Каждая вкладка получает отдельный route path. Если пользователь открыл detail внутри Projects, перешёл в Search и вернулся, Projects останется на прежнем экране.
 
-Inspector изначально закрыт, чтобы в portrait-режиме iPad не вытеснять sidebar. На широком экране он открывается системной кнопкой.
+Inspector опционален и управляется системной кнопкой. Настройка **Keep inspector open** открывает его при переходе в проект; выключенная настройка позволяет управлять им вручную.
+
+При изменении разделов shell сохраняет допустимый выбор. Если выбранный ID удалён или скрыт в compact, выбирается первый доступный элемент. Пустая конфигурация показывает **No destinations**. Paths удалённых и временно скрытых элементов сохраняются до явной очистки приложением; для повторяющихся ID используется первое вхождение. Публичные initializer’ы сохранены.
+
+В Studio demo кнопка **New project** валидирует название, создаёт локальный проект и открывает его детали. Overview, Projects и Search открывают выбранный проект и в compact, и в regular, независимо от inspector. Tasks, progress и inspector читают один `StudioStore`. Поиск сохраняет query и scope в app-owned состоянии; пустой запрос показывает все данные выбранной категории. Проекты и настройки действуют только в текущей сессии окна.
+
+`adaptiveshell://project/website-qa` открывает известный проект. Неизвестный ID или malformed URL показывает сообщение и сохраняет текущую историю, без подстановки другого fixture.
+
+Требования: Swift 6, Xcode 16.4+, iOS 17+, macOS 14+. Xcode 26+ также собирает ветку с native Liquid Glass. В CI закреплены XcodeGen 2.45.4 и SwiftLint 0.65.0.
 
 ## Документация
 
@@ -55,11 +64,15 @@ Inspector изначально закрыт, чтобы в portrait-режиме
 - [App-owned state restoration](Docs/StateRestoration.md)
 - [Доступность](Docs/Accessibility.md)
 - [Проверка качества](Docs/QualityChecklist.md)
+- [Полный demo walkthrough](Examples/AdaptiveShellDemo/README.md)
+- [Правила конфигурации и migration](Docs/Migration-1.0.4.md)
+- [Проверки и оставшиеся device gates](Docs/Validation.md)
 
 ## Проверка
 
 ```bash
 swift test
+swiftlint lint --strict
 
 xcodebuild \
   -project Examples/AdaptiveShellDemo/AdaptiveShellDemo.xcodeproj \
@@ -67,6 +80,11 @@ xcodebuild \
   -destination 'generic/platform=iOS Simulator' \
   CODE_SIGNING_ALLOWED=NO \
   build
+
+Scripts/run_ui_tests.sh iphone
+Scripts/run_ui_tests.sh ipad
 ```
+
+UI-проверки используют собственные временные симуляторы и отдельный consumer, импортирующий только публичный продукт. Проверки на физических устройствах, VoiceOver, hardware keyboard, Stage Manager и реальный adoption pilot отмечаются отдельно; generic build их не заменяет.
 
 Лицензия: MIT.

@@ -8,7 +8,8 @@ struct ProjectsView: View {
     let title: String
     let projects: [StudioProject]
     let navigation: AdaptiveShellNavigation<StudioTab, StudioRoute>
-    @Binding var selectedProjectID: String
+    let store: StudioStore
+    let coordinator: StudioCoordinator
 
     var body: some View {
         Group {
@@ -27,15 +28,15 @@ struct ProjectsView: View {
                             LazyVStack(spacing: 0) {
                                 ForEach(projects) { project in
                                     Button {
-                                        selectedProjectID = project.id
-                                        if presentation == .compact {
-                                            navigation.push(.project(project.id))
-                                        }
+                                        coordinator.openProject(
+                                            project.id, from: navigation.currentTab, presentation: presentation
+                                        )
                                     } label: {
-                                        ProjectRow(project: project)
+                                        ProjectRow(project: project, showProgress: store.showProgress)
                                             .padding(16)
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityIdentifier("project-\(project.id)")
 
                                     if project.id != projects.last?.id {
                                         Divider()
