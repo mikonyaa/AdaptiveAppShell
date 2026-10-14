@@ -19,16 +19,21 @@ def inventory(kind):
 
 
 def version(value):
-    return tuple(int(part) for part in value.split("."))
+    return (tuple(int(part) for part in value.split(".")) + (0, 0, 0))[:3]
 
 
+sdk = subprocess.run(
+    ["xcrun", "--sdk", "iphonesimulator", "--show-sdk-version"],
+    check=True, capture_output=True, text=True
+).stdout.strip()
 runtimes = [
     runtime for runtime in inventory("runtimes")
     if runtime.get("isAvailable") and ".iOS-" in runtime["identifier"]
+    and version(runtime["version"]) <= version(sdk)
     and (args.runtime is None or runtime["version"] == args.runtime)
 ]
 if not runtimes:
-    sys.exit("No matching installed iOS runtime. Install one through Xcode Settings > Components.")
+    sys.exit(f"No matching installed iOS runtime supported by SDK {sdk}. Install one in Xcode Settings > Components.")
 runtime = max(runtimes, key=lambda item: version(item["version"]))
 parts = version(runtime["version"]) + (0, 0)
 runtime_number = (parts[0] << 16) | (parts[1] << 8) | parts[2]
