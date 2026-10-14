@@ -14,3 +14,4 @@ xcuserdata/
 Assets/GIFs/*.mov
 Assets/GIFs/*.mp4
 Assets/Screenshots/qa-*.png
+__pycache__/

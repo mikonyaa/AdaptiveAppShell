@@ -1,6 +1,9 @@
 excluded:
   - .build
   - DerivedData
+  - DerivedData-showcase
+  - DerivedData-qa-iphone
+  - DerivedData-qa-ipad
 
 line_length:
   warning: 120

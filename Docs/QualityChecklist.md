@@ -5,6 +5,7 @@
 - Stable generic destination IDs
 - Independent per-destination route paths
 - Empty configuration handled without a crash
+- Dynamic section reconciliation and deterministic duplicate handling
 - Sidebar-only items normalize safely in compact width
 - Inspector is opt-in per destination
 - No feature or service dependencies in the package
@@ -35,4 +36,11 @@
 - Classic, Graphite, and Stone screenshots
 - Accessibility Extra Large screenshot
 - SwiftLint
+- Hosted demo model, window lifecycle and UI tests
+- Separate public-API consumer, released baseline and local candidate
+- Plain SemVer and v-prefixed CI triggers
+- Two-SDK CI and second-generation XcodeGen equality
+- Owned simulator / recorder cleanup in capture and test scripts
 - No unintended code comments or debug output
+
+See [Validation](Validation.md) for concrete contracts and remaining physical-device/adoption gates.

@@ -13,14 +13,17 @@ The package and demo are designed around system behavior instead of fixed visual
 - Reduce Transparency replaces custom glass actions with opaque controls
 - Native navigation keeps standard VoiceOver and keyboard behavior
 
-## Verified states
+## Simulator and automated checks
 
 - Standard Dynamic Type on iPhone and iPad
 - Accessibility Extra Large on iPhone
-- Increase Contrast on iPhone
 - Classic, Graphite, and Stone contrast
 - Compact tab presentation
 - Sidebar with and without inspector
+- Accessibility XXXL project/task/create control reachability
+- Project labels, task values and empty/recovery messages in the accessibility hierarchy
+
+These are simulator/UI assertions and visual checks. Physical VoiceOver activation, hardware keyboard focus, Increase Contrast, Reduce Transparency/Motion and Stage Manager are recorded separately in the [validation matrix](Validation.md); system controls do not by themselves prove those device gates.
 
 ## Consumer checklist
 

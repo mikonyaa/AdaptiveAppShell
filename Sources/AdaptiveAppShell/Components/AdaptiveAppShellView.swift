@@ -56,6 +56,9 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
         .onChange(of: state.selection) { _, _ in
             normalizeSelection()
         }
+        .onChange(of: sections, initial: true) { _, _ in
+            normalizeSelection()
+        }
     }
 
     private var isCompact: Bool {
@@ -63,7 +66,11 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
     }
 
     private var allItems: [AdaptiveShellItem<TabID>] {
-        sections.flatMap(\.items)
+        uniqueSections.flatMap(\.items)
+    }
+
+    private var uniqueSections: [AdaptiveShellSection<TabID>] {
+        AdaptiveShellSelectionResolver.uniqueSections(sections)
     }
 
     private var compactItems: [AdaptiveShellItem<TabID>] {
@@ -124,22 +131,20 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
             } detail: {
                 NavigationStack(path: pathBinding(for: selectedItem.id)) {
                     content(selectedItem, navigation(for: selectedItem.id))
-                        .navigationDestination(for: Route.self, destination: destination)
-                        .toolbar {
-                            if showsInspector(selectedItem) {
-                                ToolbarItem(placement: .primaryAction) {
-                                    inspectorToggle
-                                }
-                            }
+                        .toolbar { inspectorToolbar(for: selectedItem) }
+                        .navigationDestination(for: Route.self) { route in
+                            destination(route)
+                                .toolbar { inspectorToolbar(for: selectedItem) }
                         }
                 }
+                .id(selectedItem.id)
                 .background(theme.canvas)
-                .inspector(isPresented: inspectorBinding(for: selectedItem)) {
-                    inspector(selectedItem)
-                        .inspectorColumnWidth(min: 280, ideal: 330, max: 420)
-                }
             }
             .navigationSplitViewStyle(.balanced)
+            .inspector(isPresented: inspectorBinding(for: selectedItem)) {
+                inspector(selectedItem)
+                    .inspectorColumnWidth(min: 280, ideal: 330, max: 420)
+            }
             .environment(\.adaptiveShellPresentation, .regular)
         } else {
             emptyShell
@@ -148,7 +153,7 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
 
     private var sidebar: some View {
         List {
-            ForEach(sections) { section in
+            ForEach(uniqueSections) { section in
                 if let sectionTitle = section.title {
                     Section(sectionTitle) {
                         sidebarRows(section.items)
@@ -211,6 +216,15 @@ public struct AdaptiveAppShell<TabID, Route, TabContent, Destination, Inspector>
             )
         }
         .accessibilityIdentifier("adaptive-shell-inspector-toggle")
+    }
+
+    @ToolbarContentBuilder
+    private func inspectorToolbar(for item: AdaptiveShellItem<TabID>) -> some ToolbarContent {
+        if showsInspector(item) {
+            ToolbarItem(placement: .primaryAction) {
+                inspectorToggle
+            }
+        }
     }
 
     private var emptyShell: some View {

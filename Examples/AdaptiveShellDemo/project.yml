@@ -64,12 +64,76 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Info.plist
-        MARKETING_VERSION: "1.0.3"
+        MARKETING_VERSION: "1.0.4"
         PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo
         PRODUCT_NAME: "$(TARGET_NAME)"
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
         SUPPORTS_MACCATALYST: NO
         TARGETED_DEVICE_FAMILY: "1,2"
-    scheme:
-      configVariants: []
-      gatherCoverageData: false
+  AdaptiveShellDemoTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: AdaptiveShellDemoTests
+    dependencies:
+      - target: AdaptiveShellDemo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo.tests
+  StudioAdaptationHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: AdaptiveShellDemo
+        excludes:
+          - AdaptiveShellDemoApp.swift
+      - path: StudioAdaptationHost
+    dependencies:
+      - package: AdaptiveAppShell
+        product: AdaptiveAppShell
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.adaptation
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+  StudioAdaptationUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: StudioAdaptationUITests
+    dependencies:
+      - target: StudioAdaptationHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.adaptation.uitests
+  AdaptiveShellDemoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: AdaptiveShellDemoUITests
+    dependencies:
+      - target: AdaptiveShellDemo
+      - target: StudioAdaptationHost
+        embed: false
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo.uitests
+        TEST_TARGET_NAME: AdaptiveShellDemo
+
+schemes:
+  AdaptiveShellDemo:
+    build:
+      targets:
+        AdaptiveShellDemo: all
+        StudioAdaptationHost: [test]
+    test:
+      gatherCoverageData: true
+      targets:
+        - AdaptiveShellDemoTests
+        - AdaptiveShellDemoUITests
+        - StudioAdaptationUITests

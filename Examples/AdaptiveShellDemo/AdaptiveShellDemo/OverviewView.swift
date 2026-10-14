@@ -5,17 +5,21 @@ struct OverviewView: View {
     @Environment(\.adaptiveShellTheme) private var theme
     @Environment(\.adaptiveShellPresentation) private var presentation
 
-    let navigation: AdaptiveShellNavigation<StudioTab, StudioRoute>
-    @Binding var selectedProjectID: String
+    let store: StudioStore
+    let coordinator: StudioCoordinator
 
-    private let activeProjects = StudioFixtures.projects.filter {
-        $0.collection != .archive
+    private var activeProjects: [StudioProject] {
+        store.projects.filter { $0.collection != .archive }
     }
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 morningSummary
+
+                Text("Sample workspace · Session-only data")
+                    .font(.footnote)
+                    .foregroundStyle(theme.secondaryText)
 
                 StudioSectionHeader(title: "Active projects")
 
@@ -37,23 +41,24 @@ struct OverviewView: View {
 
                 AdaptiveShellCard(padding: 0) {
                     VStack(spacing: 0) {
-                        upcomingRow(
-                            day: "10",
-                            month: "JUL",
-                            title: "Spring catalogue",
-                            subtitle: "Copy review"
-                        )
-
-                        Divider()
-                            .overlay(theme.separator)
-                            .padding(.leading, 70)
-
-                        upcomingRow(
-                            day: "18",
-                            month: "JUL",
-                            title: "Website QA",
-                            subtitle: "Usability testing"
-                        )
+                        ForEach(store.upcomingTasks) { result in
+                            Button {
+                                coordinator.openProject(
+                                    result.project.id, from: .overview, presentation: presentation
+                                )
+                            } label: {
+                                upcomingRow(result)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("upcoming-project-\(result.project.id)")
+                            .accessibilityHint("Opens project details")
+                            if result.id != store.upcomingTasks.last?.id {
+                                Divider().overlay(theme.separator).padding(.leading, 70)
+                            }
+                        }
+                        if store.upcomingTasks.isEmpty {
+                            Text("No upcoming tasks.").foregroundStyle(theme.secondaryText).padding(16)
+                        }
                     }
                 }
             }
@@ -81,7 +86,7 @@ struct OverviewView: View {
                         .font(.headline)
                         .foregroundStyle(theme.primaryText)
 
-                    Text("3 projects need attention")
+                    Text("\(activeProjects.filter { $0.progress < 1 }.count) active projects")
                         .font(.subheadline)
                         .foregroundStyle(theme.secondaryText)
                 }
@@ -98,28 +103,22 @@ struct OverviewView: View {
 
     private func projectButton(_ project: StudioProject) -> some View {
         Button {
-            selectedProjectID = project.id
-            if presentation == .compact {
-                navigation.push(.project(project.id))
-            }
+            coordinator.openProject(project.id, from: .overview, presentation: presentation)
         } label: {
-            ProjectRow(project: project)
+            ProjectRow(project: project, showProgress: store.showProgress)
                 .padding(16)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("project-\(project.id)")
     }
 
-    private func upcomingRow(
-        day: String,
-        month: String,
-        title: String,
-        subtitle: String
-    ) -> some View {
-        HStack(spacing: 14) {
+    private func upcomingRow(_ result: StudioTaskResult) -> some View {
+        let dateParts = result.task.dueText.split(separator: " ")
+        return HStack(spacing: 14) {
             VStack(spacing: 0) {
-                Text(day)
+                Text(dateParts.first.map(String.init) ?? "—")
                     .font(.subheadline.weight(.bold).monospacedDigit())
-                Text(month)
+                Text(dateParts.dropFirst().first.map { $0.uppercased() } ?? "")
                     .font(.caption2.weight(.bold))
             }
                 .foregroundStyle(theme.accent)
@@ -127,11 +126,11 @@ struct OverviewView: View {
                 .background(theme.accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(result.project.name)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(theme.primaryText)
 
-                Text(subtitle)
+                Text(result.task.title)
                     .font(.subheadline)
                     .foregroundStyle(theme.secondaryText)
             }
@@ -143,6 +142,7 @@ struct OverviewView: View {
                 .foregroundStyle(theme.secondaryText.opacity(0.7))
         }
         .padding(16)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 }

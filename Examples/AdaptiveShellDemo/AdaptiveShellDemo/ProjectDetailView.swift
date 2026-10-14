@@ -5,14 +5,7 @@ struct ProjectDetailView: View {
     @Environment(\.adaptiveShellTheme) private var theme
 
     let project: StudioProject
-    @State private var completedTaskIDs: Set<String>
-
-    init(project: StudioProject) {
-        self.project = project
-        _completedTaskIDs = State(
-            initialValue: Set(project.tasks.filter(\.isComplete).map(\.id))
-        )
-    }
+    let store: StudioStore
 
     var body: some View {
         ScrollView {
@@ -21,19 +14,22 @@ struct ProjectDetailView: View {
 
                 AdaptiveShellCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        HStack {
-                            Text("Progress")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(theme.primaryText)
+                        if store.showProgress {
+                            HStack {
+                                Text("Progress")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(theme.primaryText)
 
-                            Spacer()
+                                Spacer()
 
-                            Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
-                                .font(.subheadline.monospacedDigit())
-                                .foregroundStyle(theme.secondaryText)
+                                Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
+                                    .font(.subheadline.monospacedDigit())
+                                    .foregroundStyle(theme.secondaryText)
+                                    .accessibilityIdentifier("detail-progress")
+                            }
+
+                            ProjectProgressBar(progress: project.progress)
                         }
-
-                        ProjectProgressBar(progress: project.progress)
 
                         HStack {
                             ProjectStatusBadge(status: project.status)
@@ -46,6 +42,10 @@ struct ProjectDetailView: View {
                 }
 
                 StudioSectionHeader(title: "Tasks")
+
+                if project.tasks.isEmpty {
+                    Text("No tasks in this project yet.").font(.subheadline).foregroundStyle(theme.secondaryText)
+                }
 
                 AdaptiveShellCard(padding: 0) {
                     VStack(spacing: 0) {
@@ -69,6 +69,7 @@ struct ProjectDetailView: View {
         .background(theme.canvas)
         .navigationTitle(project.name)
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("project-detail-\(project.id)")
     }
 
     private var header: some View {
@@ -93,16 +94,12 @@ struct ProjectDetailView: View {
 
     private func taskRow(_ task: StudioTask) -> some View {
         Button {
-            if completedTaskIDs.contains(task.id) {
-                completedTaskIDs.remove(task.id)
-            } else {
-                completedTaskIDs.insert(task.id)
-            }
+            store.toggleTask(task.id, in: project.id)
         } label: {
             HStack(spacing: 14) {
-                Image(systemName: completedTaskIDs.contains(task.id) ? "checkmark.square.fill" : "square")
+                Image(systemName: task.isComplete ? "checkmark.square.fill" : "square")
                     .font(.title3)
-                    .foregroundStyle(completedTaskIDs.contains(task.id) ? theme.success : theme.secondaryText)
+                    .foregroundStyle(task.isComplete ? theme.success : theme.secondaryText)
 
                 Text(task.title)
                     .foregroundStyle(theme.primaryText)
@@ -117,7 +114,9 @@ struct ProjectDetailView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityValue(completedTaskIDs.contains(task.id) ? "Complete" : "Incomplete")
+        .accessibilityValue(task.isComplete ? "Complete" : "Incomplete")
+        .accessibilityHint("Toggles task completion")
+        .accessibilityIdentifier("task-\(project.id)-\(task.id)")
     }
 }
 
@@ -125,6 +124,8 @@ struct ProjectInspectorView: View {
     @Environment(\.adaptiveShellTheme) private var theme
 
     let project: StudioProject
+    var showProgress = true
+    let onClose: () -> Void
 
     var body: some View {
         ScrollView {
@@ -141,6 +142,17 @@ struct ProjectInspectorView: View {
                             .font(.subheadline)
                             .foregroundStyle(theme.secondaryText)
                     }
+                    Spacer(minLength: 0)
+                    Button(role: .cancel, action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(theme.secondaryText)
+                    .accessibilityLabel("Close inspector")
+                    .accessibilityIdentifier("inspector-close")
                 }
 
                 Divider()
@@ -151,14 +163,17 @@ struct ProjectInspectorView: View {
                         .font(.headline)
                         .foregroundStyle(theme.primaryText)
 
-                    ProjectProgressBar(progress: project.progress)
+                    if showProgress { ProjectProgressBar(progress: project.progress) }
 
                     HStack {
                         ProjectStatusBadge(status: project.status)
                         Spacer()
-                        Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
-                            .font(.subheadline.monospacedDigit())
-                            .foregroundStyle(theme.secondaryText)
+                        if showProgress {
+                            Text(project.progress.formatted(.percent.precision(.fractionLength(0))))
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(theme.secondaryText)
+                                .accessibilityIdentifier("inspector-progress")
+                        }
                     }
                 }
 
@@ -167,8 +182,11 @@ struct ProjectInspectorView: View {
                         .font(.headline)
                         .foregroundStyle(theme.primaryText)
 
-                    ownerRow(initials: "AM", name: "Alex Morgan", role: "Design Director")
-                    ownerRow(initials: "NW", name: "Noah Williams", role: "Art Director")
+                    ForEach(project.ownerInitials, id: \.self) { initials in
+                        if let person = StudioFixtures.people.first(where: { $0.id == initials }) {
+                            ownerRow(initials: initials, name: person.name, role: person.role)
+                        }
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -176,7 +194,9 @@ struct ProjectInspectorView: View {
                         .font(.headline)
                         .foregroundStyle(theme.primaryText)
 
-                    Label("Print proof · 14 Jul", systemImage: "calendar")
+                    Label(project.tasks.first(where: { !$0.isComplete }).map {
+                        "\($0.title) · \($0.dueText)"
+                    } ?? project.dueText, systemImage: "calendar")
                         .font(.subheadline)
                         .foregroundStyle(theme.secondaryText)
                 }
@@ -199,6 +219,7 @@ struct ProjectInspectorView: View {
             .padding(20)
         }
         .background(theme.surface)
+        .accessibilityIdentifier("project-inspector-\(project.id)")
     }
 
     private func ownerRow(
@@ -230,14 +251,31 @@ struct ProjectInspectorView: View {
 struct TaskDetailView: View {
     @Environment(\.adaptiveShellTheme) private var theme
 
+    let projectID: String
     let taskID: String
+    let store: StudioStore
 
     var body: some View {
-        StudioEmptyState(
-            title: "Task details",
-            message: "Selected task: \(taskID)",
-            systemImage: "checklist"
-        )
+        Group {
+            if let project = store.project(id: projectID), let task = project.tasks.first(where: { $0.id == taskID }) {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text(task.title).font(.title2.bold())
+                        .accessibilityIdentifier("task-detail-\(projectID)-\(taskID)")
+                    Text("\(project.name) · \(task.dueText)").foregroundStyle(theme.secondaryText)
+                    Button(task.isComplete ? "Mark incomplete" : "Mark complete") {
+                        store.toggleTask(taskID, in: projectID)
+                    }
+                    .accessibilityValue(task.isComplete ? "Complete" : "Incomplete")
+                    .accessibilityIdentifier("task-detail-toggle")
+                }
+                .padding(24)
+            } else {
+                StudioEmptyState(
+                    title: "Task not found",
+                    message: "This task is not available in this session.", systemImage: "checklist"
+                )
+            }
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.canvas)
         .navigationTitle("Task")

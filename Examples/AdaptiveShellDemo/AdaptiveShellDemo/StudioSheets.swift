@@ -8,18 +8,21 @@ struct NewProjectSheet: View {
     @State private var name = ""
     @State private var category = "Brand"
     @State private var dueDate = Date.now.addingTimeInterval(604_800)
+    let create: (String, String, Date) -> Bool
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Project") {
                     TextField("Name", text: $name)
+                        .accessibilityIdentifier("new-project-name")
                     TextField("Category", text: $category)
+                        .accessibilityIdentifier("new-project-category")
                     DatePicker("Due date", selection: $dueDate, displayedComponents: .date)
                 }
 
                 Section {
-                    Text("This demo keeps creation local. Replace the action with your own repository or service.")
+                    Text("Session-only demo data. Projects and changes reset when the app closes.")
                         .font(.footnote)
                         .foregroundStyle(theme.secondaryText)
                 }
@@ -35,7 +38,7 @@ struct NewProjectSheet: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Create") {
-                        dismiss()
+                        if create(name, category, dueDate) { dismiss() }
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
