@@ -2,12 +2,8 @@ import XCTest
 
 @MainActor
 final class StudioSearchUITests: XCTestCase {
-    override func tearDown() {
-        XCUIDevice.shared.orientation = .portrait
-        super.tearDown()
-    }
-
     func testPeopleScopeShowsEmptyStateAndRetainsQueryAcrossRotationAndTabs() {
+        defer { XCUIDevice.shared.orientation = .portrait }
         let app = launchStudio(["--search"])
         replaceSearchQuery("spring", in: app)
         app.buttons["People"].tap()
