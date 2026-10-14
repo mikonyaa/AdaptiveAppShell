@@ -2,6 +2,23 @@ import XCTest
 
 @MainActor
 extension XCTestCase {
+    func openStudioURL(_ url: URL) -> XCUIApplication {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.terminate()
+        let sender = XCUIApplication(bundleIdentifier: "dev.liquidglasstemplates.adaptiveshell.adaptation")
+        sender.launchArguments = ["--open-url", url.absoluteString]
+        sender.launch()
+        sender.buttons["open-demo-link"].tap()
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let open = springboard.buttons.matching(
+            NSPredicate(format: "label IN %@", ["Open", "Открыть"])
+        ).firstMatch
+        if open.waitForExistence(timeout: 3) { open.tap() }
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+        return app
+    }
+
     func launchStudio(_ arguments: [String] = []) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()

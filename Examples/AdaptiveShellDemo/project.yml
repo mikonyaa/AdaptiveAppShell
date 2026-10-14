@@ -117,10 +117,13 @@ targets:
       - path: AdaptiveShellDemoUITests
     dependencies:
       - target: AdaptiveShellDemo
+      - target: StudioAdaptationHost
+        embed: false
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: dev.liquidglasstemplates.adaptiveshell.demo.uitests
+        TEST_TARGET_NAME: AdaptiveShellDemo
 
 schemes:
   AdaptiveShellDemo:

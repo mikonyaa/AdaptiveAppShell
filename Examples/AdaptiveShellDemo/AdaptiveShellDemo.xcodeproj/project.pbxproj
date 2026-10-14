@@ -53,6 +53,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		431F098BA4A94F96E3AF8D6C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3E90E4BC916F69D6EA9250B8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FFFD6C1BDF49A63AC66F4023;
+			remoteInfo = StudioAdaptationHost;
+		};
 		C3784C8646625D09559A1184 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3E90E4BC916F69D6EA9250B8 /* Project object */;
@@ -238,6 +245,7 @@
 			);
 			dependencies = (
 				6CBE81FF1D63AF4B46CF3FF5 /* PBXTargetDependency */,
+				7ACD16305FCBF02730F94B9C /* PBXTargetDependency */,
 			);
 			name = AdaptiveShellDemoUITests;
 			packageProductDependencies = (
@@ -464,6 +472,11 @@
 			isa = PBXTargetDependency;
 			target = E309D1EA6A434D6608901F81 /* AdaptiveShellDemo */;
 			targetProxy = E06493A835FAC3AF35A39989 /* PBXContainerItemProxy */;
+		};
+		7ACD16305FCBF02730F94B9C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FFFD6C1BDF49A63AC66F4023 /* StudioAdaptationHost */;
+			targetProxy = 431F098BA4A94F96E3AF8D6C /* PBXContainerItemProxy */;
 		};
 		D3387B0D04D0F78E12D282A2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

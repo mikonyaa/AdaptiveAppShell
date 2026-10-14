@@ -45,10 +45,8 @@ final class StudioNavigationUITests: XCTestCase {
     }
 
     func testColdKnownDeepLinkOpensOneCorrectDestination() {
-        let app = XCUIApplication()
-        app.terminate()
         let known = URL(string: "adaptiveshell://project/website-qa")!
-        app.open(known)
+        let app = openStudioURL(known)
         XCTAssertTrue(app.navigationBars["Website QA"].waitForExistence(timeout: 10))
         app.navigationBars["Website QA"].buttons.firstMatch.tap()
         XCTAssertTrue(app.buttons["project-website-qa"].waitForExistence(timeout: 5))
@@ -56,12 +54,11 @@ final class StudioNavigationUITests: XCTestCase {
     }
 
     func testColdUnknownAndMalformedDeepLinksDoNotOpenAnotherProject() {
-        let app = XCUIApplication()
-        app.open(URL(string: "adaptiveshell://project/does-not-exist")!)
+        let app = openStudioURL(URL(string: "adaptiveshell://project/does-not-exist")!)
         XCTAssertTrue(app.alerts["Project not found"].waitForExistence(timeout: 5))
         app.alerts.buttons["OK"].tap()
         XCTAssertTrue(app.navigationBars["Overview"].exists)
-        app.open(URL(string: "adaptiveshell://project/spring-catalogue/extra")!)
+        _ = openStudioURL(URL(string: "adaptiveshell://project/spring-catalogue/extra")!)
         XCTAssertTrue(app.alerts["Invalid link"].waitForExistence(timeout: 5))
         app.alerts.buttons["OK"].tap()
         XCTAssertTrue(app.navigationBars["Overview"].exists)

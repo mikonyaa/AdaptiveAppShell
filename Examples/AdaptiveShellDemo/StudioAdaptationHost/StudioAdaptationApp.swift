@@ -1,9 +1,23 @@
 import SwiftUI
+import UIKit
 
 @main
 struct StudioAdaptationApp: App {
     var body: some Scene {
-        WindowGroup { StudioAdaptationHarness() }
+        WindowGroup {
+            if let url = launchURL {
+                Button("Open demo link") { UIApplication.shared.open(url) }
+                    .accessibilityIdentifier("open-demo-link")
+            } else {
+                StudioAdaptationHarness()
+            }
+        }
+    }
+
+    private var launchURL: URL? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "--open-url"), index + 1 < arguments.count else { return nil }
+        return URL(string: arguments[index + 1])
     }
 }
 
