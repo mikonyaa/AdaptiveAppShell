@@ -48,7 +48,10 @@ final class ConsumerUITests: XCTestCase {
     }
 
     private func configure(_ action: String) {
-        app.buttons["Configuration"].tap()
+        let configuration = app.buttons["Configuration"]
+        XCTAssertTrue(configuration.waitForExistence(timeout: 5))
+        XCTAssertTrue(configuration.isHittable)
+        configuration.tap()
         app.buttons[action].tap()
     }
 }

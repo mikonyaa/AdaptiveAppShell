@@ -17,6 +17,14 @@ public struct ConsumerView: View {
     ]
 
     public var body: some View {
+        VStack(spacing: 0) {
+            configurationControls
+            shell
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var shell: some View {
         AdaptiveAppShell(
             title: "Public consumer",
             sections: items.enumerated().map { index, item in
@@ -38,35 +46,38 @@ public struct ConsumerView: View {
             }
         )
         .environment(\.horizontalSizeClass, compact ? .compact : .regular)
-        .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 6) {
-                HStack {
-                    Menu("Configuration") {
-                        Button("Remove selected") { items.removeAll { $0.id == state.selection } }
-                        Button("Clear sections") { items = [] }
-                        Button("Load sections") { items = Self.initialItems }
-                        Button("Remove other") { items.removeAll { $0.id != state.selection } }
-                        Button("Reverse order") { items.reverse() }
-                        Button("Hide Alpha") {
-                            items = [
-                                AdaptiveShellItem(
-                                    id: "alpha", title: "Alpha", systemImage: "a.circle", compactPlacement: .hidden
-                                ),
-                                Self.initialItems[1]
-                            ]
-                        }
-                        Button("Duplicate Alpha") { items.append(Self.initialItems[0]) }
+    }
+
+    private var configurationControls: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Menu("Configuration") {
+                    Button("Remove selected") { items.removeAll { $0.id == state.selection } }
+                    Button("Clear sections") { items = [] }
+                    Button("Load sections") { items = Self.initialItems }
+                    Button("Remove other") { items.removeAll { $0.id != state.selection } }
+                    Button("Reverse order") { items.reverse() }
+                    Button("Hide Alpha") {
+                        items = [
+                            AdaptiveShellItem(
+                                id: "alpha", title: "Alpha", systemImage: "a.circle", compactPlacement: .hidden
+                            ),
+                            Self.initialItems[1]
+                        ]
                     }
-                    Button("Select Alpha") { state.select("alpha") }
-                    Button("Select Beta") { state.select("beta") }
+                    Button("Duplicate Alpha") { items.append(Self.initialItems[0]) }
                 }
-                Button(compact ? "Use regular" : "Use compact") { compactOverride = !compact }
-                Text("Selection: \(state.selection)")
-                    .accessibilityIdentifier("consumer-selection")
+                Button("Select Alpha") { state.select("alpha") }
+                Button("Select Beta") { state.select("beta") }
             }
-            .font(.caption)
-            .padding(8)
-            .background(.regularMaterial)
+            Button(compact ? "Use regular" : "Use compact") { compactOverride = !compact }
+            Text("Selection: \(state.selection)")
+                .accessibilityIdentifier("consumer-selection")
         }
+        .font(.caption)
+        .buttonStyle(.bordered)
+        .padding(8)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial)
     }
 }
